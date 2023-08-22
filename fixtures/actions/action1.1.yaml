@@ -1,0 +1,49 @@
+name: Deployment to Prod
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Set up Node.js version
+      uses: actions/setup-node@v1
+      with:
+        node-version: '16.20.x'
+
+    - name: Install dependencies
+      run: npm ci --legacy-peer-deps
+
+    - name: Build
+      env:
+        NEXT_PUBLIC_STRAPI_API_URL: ${{ env.NEXT_PUBLIC_STRAPI_API_URL }}
+      run: npm run build
+
+    - name: Setup environment vars
+      env:
+        NEXT_PUBLIC_STRAPI_API_URL: ${{ env.NEXT_PUBLIC_STRAPI_API_URL }}
+        SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+        SERVICE_NAME: ${{ vars.GCP_SERVICE_NAME }}
+      run: eval "echo \"$(cat app.yaml)\"" > app.yaml
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT}}
+
+    - id: 'deploy'
+      uses: 'google-github-actions/deploy-appengine@v1'
+    
+    - name: Test deploy
+      run: curl "${{ steps.deploy.outputs.url }}"

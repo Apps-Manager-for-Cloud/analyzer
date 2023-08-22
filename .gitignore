@@ -1,0 +1,41 @@
+# Logs
+logs
+*.log
+
+# Dependencies
+node_modules
+
+# Environment variables
+.env
+
+# Build output
+dist
+build
+out
+
+# IDE/Editor specific files
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+*.bak
+*.tmp
+
+# Cache and temporary files
+.cache
+.temp
+
+# Tests
+tmp
+coverage
